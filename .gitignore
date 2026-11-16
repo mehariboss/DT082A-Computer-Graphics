@@ -1,6 +1,7 @@
 # Kursboken – pushas aldrig
 textbook/*
 !textbook/README.md
+!textbook/INDEX.md
 *.epub
 
 # Personliga Claude-inställningar (de delade ligger i .claude/commands)

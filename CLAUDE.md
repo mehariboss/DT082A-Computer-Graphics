@@ -38,15 +38,18 @@ project/1-topic-proposal/   Ämnesförslaget + project-ideas.md/.pdf (lärarens 
 project/2-code/      Projektkoden (WebGL: index.html, src/, shaders/, libs/)
 project/3-presentation/     Presentationen + presentation-instructions.md/.pdf (upplägg, opponering, inlämning)
 notes/               Mina egna anteckningar och tentaplugg
-textbook/            Kursboken (ligger lokalt, pushas INTE till GitHub)
+textbook/book.pdf    Kursboken (bara lokalt, pushas INTE till GitHub)
+textbook/INDEX.md    Bokens innehåll med PDF-sidnummer + koppling till föreläsningar/labbar
 ```
 
 ## Regler för dig (Claude)
 
 ### 1. Använd kursmaterialet som källa
-- När du förklarar något: utgå från föreläsningarna i `lectures/text/` och hänvisa, t.ex. *"(Lecture 5, Viewing – Projection types)"*.
-- Använd `lectures/INDEX.md` för att hitta rätt föreläsning snabbt.
-- Om bilderna inte räcker: nämn kapitlet i Angel & Shreiner.
+Kursboken och föreläsningarna är lika viktiga. Boken är ofta mer utförlig och har kodexempel.
+- **Föreläsningarna:** `lectures/text/`, hitta rätt med `lectures/INDEX.md`.
+- **Boken:** slå upp avsnittet i `textbook/INDEX.md`, läs sedan bara de sidorna i `textbook/book.pdf` med Read-verktyget och `pages` (t.ex. `pages: "197-203"`, högst 20 sidor per anrop). Läs aldrig hela boken.
+- Vid förklaringar: titta i **både** föreläsningen och boken, och hänvisa till båda, t.ex. *"(Lecture 4; Angel & Shreiner 4.6, s. 196)"*. Ange bokens tryckta sidnummer, som är PDF-sidan − 1.
+- Om `textbook/book.pdf` saknas: säg till mig att lägga in den (se `textbook/README.md`), och använd föreläsningarna så länge.
 - Hitta inte på saker som "läraren sa". Står det inte i materialet, säg det.
 
 ### 2. Projektet
