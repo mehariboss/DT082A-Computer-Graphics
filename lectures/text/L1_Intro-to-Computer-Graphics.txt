@@ -1,0 +1,342 @@
+DT082A Computer Graphics
+
+Lecture 1 - Introduction to Computer Graphics
+                    Have you seen?
+
+
+
+
+Mittuniversitetet                    2
+1989   1993   1999   2003   2013   3
+                               Computer Graphics
+
+
+
+
+                    Roger Olsson, PhD         Emin Zerman, PhD
+                    Roger.Olsson@miun.se   Emin.Zerman@miun.se
+                    010 142 86 98                  010 172 65 27
+                    L420                                    L421
+
+Mittuniversitetet                                                  4
+DT082A Computer Graphics
+
+• 6 Lectures        /   3 Seminars   /   2 Labs   /   Hands on project(s)
+
+
+
+
+Mittuniversitetet                                                           5
+DT082A Computer Graphics
+
+• After completing the course the student should be
+  able to:
+
+- explain and compare different alternatives for the
+steps required in the transformation from a scene
+description to a rendered image;
+
+- analyze and apply algorithms and techniques to
+create 3D applications considering sub-areas such as
+transformations, models for local lighting and global        The course is taught using lectures and laboratory sessions.
+illumination, rasterization, ray tracing, and interaction;   The large part of the course is with limited supervision,
+                                                             where the student is assumed to work on lecture material,
+- construct a computer graphics application using            laboratory work, and scientific papers.
+existing APIs, 3D engines and 3D modeling tools
+suitable for a given task;                                   L101: Laboratory work, 1.5 hp    -- Fail (U) or Pass (G)
+- apply appropriate knowledge of computer graphics,
+interaction, and rendering when designing a computer         P101: Project work, 1.5 hp       -- A-F / Fx
+graphics application.
+                                                             T101: Written exam, 3 hp         -- A-F / Fx
+
+
+Mittuniversitetet                                                                                                   6
+Course Literature
+
+                    • Interactive Computer Graphics      • (Reference) Real-Time
+                      A Top-Down Approach with             Rendering, Tomas
+                      WebGL, Edward Angel and Dave         Akenine-Möller et al. 4th
+                      Shreiner, 7th Ed., Pearson, 2015     Ed., CRC Press, 2018
+
+
+
+
+Mittuniversitetet                                                                      7
+Mini projects!
+
+• A new feature! Below is the general structure:
+• Details will be announced this week
+        • Group and project selection           - TBA
+        • Project topics for this year (HT2025) - TBD
+
+
+
+
+Mittuniversitetet                                       8
+  Pedagogical/Andragogical approach
+
+
+
+
+   Active learning             Visible learning              Motivation
+
+
+
+Students are active!
+                                                  External           Internal
+Hands-on approach
+
+Collaborative learning
+
+ Final presentation
+  (Peer review?)
+
+  Mittuniversitetet                                                       9
+Lecture + Seminar structure!
+
+• (Semi-) flipped classroom
+        • Initial lecture – setting the scene and providing foundational knowledge
+        • Students engage with core material – reading and engaging with online content
+        • Discussion seminar
+
+
+
+
+Mittuniversitetet                                                                         10
+Expectations before the discussion seminar
+
+• Reading relevant chapters
+• Watching online videos
+• (Optional) Doing additional research
+• (Optional) Chatting with your favorite GenAI
+  LLM (e.g., ChatGPT)
+
+
+• Weekly tasks
+• Coming up with questions/discussion points
+
+
+
+
+Have you checked the Canvas page?
+Mittuniversitetet                                11
+                       So, what is
+                    Computer Graphics?
+
+
+
+
+Mittuniversitetet                        12
+Three pillars of Computer Graphics
+
+
+
+
+                    Modelling                           Rendering                         Animation
+
+
+
+
+Mittuniversitetet               Inspired by Lectures of Cem Yuksel – University of Utah               13
+Three pillars of Computer Graphics
+
+
+
+
+                    Modelling                           Rendering                         Animation
+Mittuniversitetet               Inspired by Lectures of Cem Yuksel – University of Utah               14
+Core topics and application areas
+
+
+
+
+Mittuniversitetet                   15
+Toolkits & Formats for Computer Graphics Applications
+
+
+
+
+Mittuniversitetet                                       16
+Toolkits & Formats for Computer Graphics Applications
+
+
+
+
+                    •   Basics of computer graphics
+                    •   Foundational knowledge for advanced tasks
+                    •   Easy & fast to implement
+                    •   Can run easily on different systems
+                    •   Versatile
+
+Mittuniversitetet                                                   17
+Experience & expectations
+
+
+
+
+Mittuniversitetet           18
+Experience & expectations
+
+
+
+
+Mittuniversitetet           19
+Experience & expectations
+
+
+
+
+Mittuniversitetet           20
+But, how does WebGL work?                var gl;
+                                         var points;
+
+                                         window.onload = function init() {
+• HTML + Javascript                          var canvas = document.getElementById( "gl-canvas" );
+
+        • Very basic level                    gl = WebGLUtils.setupWebGL( canvas );
+                                              if ( !gl ) { alert( "WebGL isn't available" ); }
+
+                                              var vertices = new Float32Array([-1, -1, 0, 1, 1, -1]);
+
+
+• A canvas is created on the HTML page        // Configure WebGL
+                                              gl.viewport( 0, 0, canvas.width, canvas.height );
+
+  and the Javascript is working on the        gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
+
+
+  canvas                                      // Load shaders and initialize attribute buffers
+                                              var program = initShaders( gl, "vertex-shader", "fragment-shader" );
+                                              gl.useProgram( program );
+
+                                              // Load the data into the GPU
+                                              var bufferId = gl.createBuffer();
+                                              gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
+                                              gl.bufferData( gl.ARRAY_BUFFER,vertices, gl.STATIC_DRAW );
+
+                                              // Associate out shader variables with our data buffer
+                                              var vPosition = gl.getAttribLocation( program, "vPosition" );
+                                              gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
+                                              gl.enableVertexAttribArray( vPosition );
+
+                                              render();
+                                         };
+
+                                         function render() {
+                                              gl.clear( gl.COLOR_BUFFER_BIT );
+                                              gl.drawArrays( gl.TRIANGLES, 0, 3 );
+                                         }
+
+Mittuniversitetet                                                                                                    21
+Computer graphics system
+
+
+
+
+Mittuniversitetet          22
+Vector vs. Raster
+
+AI              SVG   BMP   JPG
+
+PDF             EPS   GIF   PNG
+
+
+
+
+Mittuniversitetet                 23
+Pinhole camera model
+
+
+
+
+Mittuniversitetet      24
+3D space (of capture/rendering)
+
+
+
+
+                                      z
+
+
+
+
+                                  x            y
+
+Mittuniversitetet                         25
+Which 3D axis?
+
+
+                        y
+
+
+
+
+                            x
+
+                    z
+
+
+
+
+Mittuniversitetet               26
+How do we “render”? A.k.a. Ray Tracing
+
+
+
+   • The most accurate way to render scenes.
+
+
+   • Can be very expensive for time
+      • GPUs can handle nowadays
+
+                                                    y
+   • Perhaps not the best method for mobile /
+     embedded devices
+
+
+
+
+                                                z       x
+
+Mittuniversitetet                                           27
+How does WebGL (or OpenGL) enter the scene?
+
+
+
+
+Mittuniversitetet                             28
+Next lectures
+
+• Programming in
+  WebGL
+• Interaction and
+  animation
+• Geometric objects
+  and
+  transformations
+• Viewing, lighting
+  and shading
+• Techniques and
+  buffers
+• (Virtual Reality)
+
+Mittuniversitetet     29
+Before next lecture
+
+• Read the relevant chapters
+• Check the tasks
+        • Please carry on the tasks
+
+• Prepare questions/discussion points for the discussion session!
+
+
+
+
+Mittuniversitetet                                                   30
+Questions / comments
+
+
+
+
+Mittuniversitetet      31
+

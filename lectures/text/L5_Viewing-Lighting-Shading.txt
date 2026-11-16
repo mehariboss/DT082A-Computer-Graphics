@@ -1,0 +1,683 @@
+              DT082A Computer Graphics
+              DT067A Computer Graphics and Virtual Reality
+              Lecture 5 – Viewing, Lighting, and Shading
+
+
+
+Lecture slides based on content from
+Angel and Shreiner: Interactive Computer Graphics 7E © Addison-Wesley 2015
+Outline
+
+• Viewing and shadows (Chapter 5)
+        • Classical viewing
+               • Basic concepts
+               • Projection types
+        • Viewing with a computer
+               • Camera
+               • How it works in WebGL
+        • Shadows
+
+
+• Lighting and shading (Chapter 6)
+        • Light(s)
+        • Light-material interaction
+        • Shading
+
+
+
+
+Mittuniversitetet                        2
+                                        Viewing
+
+
+                    Classical viewing             Viewing with computers
+
+
+
+
+Mittuniversitetet                                                          3
+Classical viewing
+
+• Viewing requires three basic elements
+    • One or more objects
+    • A viewer with a projection surface
+    • Projectors that go from the object(s) to the
+      projection surface
+
+
+• Classical views are based on the relationship
+  among these elements
+    • The viewer picks up the object and orients it
+      how she would like to see it
+
+
+• Each object is assumed to constructed from flat
+  principal faces
+    • Buildings, polyhedra, manufactured objects
+
+Mittuniversitetet                                     4
+Classical viewing: Projections
+
+• Projectors are lines that either
+        • converge at a center of projection (COP)
+        • are parallel (DOP – direction of projection)
+
+• Such projections preserve lines but not necessarily angles
+• Nonplanar projections are needed for applications such
+  as map construction
+
+
+
+
+Mittuniversitetet                                              5
+Classical viewing: Principal faces
+
+
+
+
+Mittuniversitetet                    6
+Classical viewing
+
+
+
+
+Mittuniversitetet   7
+Classical viewing
+
+
+                                  Planar Geometric Projections
+
+
+
+
+                      Parallel                                   Perspective
+
+
+
+ Multiview
+                    Axonometric   Oblique              1-point     2-point     3-point
+Ortographic
+
+
+
+
+Mittuniversitetet                                                                        8
+Classical viewing: Orthographic projection
+
+
+
+
+Mittuniversitetet                            9
+Classical viewing: Axonometric projection
+
+
+
+
+Mittuniversitetet                           10
+Classical viewing: Oblique projection
+
+
+
+
+Mittuniversitetet                       11
+Classical viewing
+
+
+                                  Planar Geometric Projections
+
+
+
+
+                      Parallel                                   Perspective
+
+
+
+ Multiview
+                    Axonometric   Oblique              1-point     2-point     3-point
+Ortographic
+
+
+
+
+Mittuniversitetet                                                                        12
+Classical viewing: Perspective projection
+
+
+
+                                      Parallel lines (not parallel to the projection
+                                      plan) on the object converge at a single point
+                                      in the projection (the vanishing point)
+
+                                      Drawing simple perspectives by hand uses
+                                      these vanishing point(s)
+
+
+
+
+Mittuniversitetet                                                                      13
+Classical viewing: Perspective projection
+
+
+
+
+Mittuniversitetet                           14
+Viewing with a Computer
+
+
+
+• There are three aspects of the viewing
+  process, all of which are implemented in the
+  pipeline,
+    • Positioning the camera
+         • Setting the model-view matrix
+
+        • Selecting a lens
+           • Setting the projection matrix
+
+        • Clipping
+            • Setting the view volume
+
+
+
+Mittuniversitetet                                15
+Viewing with a Computer
+
+• In WebGL, initially the object and camera
+  frames are the same
+        • Default model-view matrix is an identity
+
+
+• The camera is located at origin and points in the
+  negative z direction
+
+
+• WebGL also specifies a default view volume
+  that is a cube with sides of length 2 centered at
+  the origin
+        • Default projection matrix is an identity
+
+
+
+
+Mittuniversitetet                                     16
+Viewing with a Computer
+
+• If we want to visualize objects with both positive and
+  negative z values we can either
+     • Move the camera in the positive z direction
+        • Translate the camera frame
+     • Move the objects in the negative z direction
+        • Translate the world frame
+• Both of these views are equivalent and are determined by
+  the model-view matrix
+    • Want a translation
+        • translate(0.0,0.0,-d);
+        • d > 0
+
+
+
+
+Mittuniversitetet                                            17
+Viewing with a Computer
+
+• We can move the camera to any desired position by a sequence
+  of rotations and translations
+• Example: side view
+        • Rotate the camera
+        • Move it away from origin
+        • Model-view matrix C = TR
+
+
+
+
+modelViewMatrix = mult(translate(0, 0, -d), rotateY(-90));
+
+
+
+
+Mittuniversitetet                                                18
+Viewing with a Computer
+
+• The GLU library contained the function gluLookAt to form the
+  required modelview matrix through a simple interface
+• Note the need for setting an up direction
+• Replaced by lookAt() in MV.js
+   • Can concatenate with modeling transformations
+• Example: isometric view of cube aligned with axes
+
+
+          var eye = vec3(1.0, 1.0, 1.0);
+          var at = vec3(0.0, 0.0, 0.0);
+          var up = vec3(0.0, 1.0, 0.0);
+
+          var mv    = LookAt(eye, at, up);
+
+
+
+Mittuniversitetet                                                19
+Viewing with a Computer
+
+• The LookAt function is only one
+  possible API for positioning the
+  camera
+• Others include
+   • Yaw, pitch, roll
+   • Elevation, azimuth, twist/roll
+
+
+
+
+Mittuniversitetet                     20
+Viewing with a Computer: Orthogonal Projection
+
+
+
+
+Mittuniversitetet                                21
+Viewing with a Computer: Perspective Projection
+
+
+
+
+Mittuniversitetet                                 22
+Viewing with a Computer: Perspective Projection
+
+
+
+
+Mittuniversitetet                                 23
+Viewing with a Computer: Perspective Projection
+
+
+
+
+                    CTM
+
+
+
+
+Mittuniversitetet                                 24
+Viewing with a Computer: Shadows
+
+• When do we not see shadows in a real scene?
+        • When the only light source is a point source at the eye or center of projection
+        • Shadows are behind objects and not visible
+
+• Shadows are a global rendering issue
+        • Is a surface visible from a source
+        • May be obscured by other objects
+
+• Note that shadows are generated automatically by a ray tracers
+        • feeler rays will detect if no light reaches a point
+        • need all objects to be available
+
+• Pipeline renderers work an object at a time so shadows are not automatic
+        • can use some tricks: projective shadows
+        • multi-rendering: shadow maps and shadow volumes
+
+
+
+Mittuniversitetet                                                                           25
+Viewing with a Computer: Shadows
+
+
+
+Projective shadows
+• Oldest methods
+    • Used in flight simulators to provide
+      visual clues
+• Projection of a polygon is a polygon
+  called a shadow polygon
+
+
+• Given a point light source and a
+  polygon, the vertices of the shadow
+  polygon are the projections of the
+  original polygon’s vertices from a point
+  source onto a surface
+Mittuniversitetet                            26
+Viewing with a Computer: Shadows
+
+• If we render a scene from a light source, the depth
+  buffer will contain the distances from the source to
+  nearest lit fragment.
+• We can store these depths in a texture called a depth
+  map or shadow map
+• Note that although we don’t care about the image in the
+  shadow map, if we render with some light, anything lit is
+  not in shadow.
+• Form a shadow map for each source
+
+
+
+
+Mittuniversitetet                                             27
+Viewing with a Computer: Shadows
+
+
+
+• During the final rendering we compare the distance from the fragment to the light source
+  with the distance in the shadow map
+
+
+• If the depth in the shadow map is less than the distance from the fragment to the source
+  the fragment is in shadow (from this source)
+
+
+• Otherwise we use the rendered color
+
+
+
+
+Mittuniversitetet                                                                            28
+Lighting and Shading
+
+• Why do we need to understand and why do we need shading?
+• Model spehere with glColor
+
+
+
+
+Mittuniversitetet                                            29
+Lighting and Shading
+
+
+• Light-material interactions cause each
+  point to have a different color or shade
+
+
+• We need to consider
+   • Light sources
+   • Material properties
+   • Location of viewer
+   • Surface orientation
+
+
+
+
+Mittuniversitetet                            30
+Lighting and Shading
+
+• Light strikes A
+        • Some scattered
+        • Some absorbed
+
+• Some of scattered light strikes B
+        • Some scattered
+        • Some absorbed
+
+• Some of this scattered
+light strikes A and so on
+
+
+
+
+Mittuniversitetet                     31
+Light sources
+
+General light sources are difficult to work with
+because we must integrate light coming from all
+points on the source
+
+
+Point source
+        • Model with position and color
+        • Distant source = infinite distance away (parallel)
+
+Spotlight
+        • Restrict light from ideal point source
+
+Ambient light                                                  (Sun)
+        • Same amount of light everywhere in scene
+        • Can model contribution of many sources and
+          reflecting surfaces
+
+Mittuniversitetet                                              32
+Light sources
+
+Spotlight
+        • Restrict light from ideal point source
+
+
+Ambient light
+        • Same amount of light everywhere in scene
+        • Can model contribution of many sources and reflecting surfaces
+
+
+
+
+                                                                           Light DEMO
+
+
+
+
+                                                                                        Light
+                                                                                        DEMO
+
+
+Mittuniversitetet                                                                               33
+Specifying light sources in WebGL
+
+For each light source, we can set an RGBA
+for the diffuse, specular, and ambient          var diffuse0   = vec4(1.0, 0.0, 0.0, 1.0);
+components, and for the position:
+                                                var ambient0   = vec4(1.0, 0.0, 0.0, 1.0);
+The position is given in homogeneous            var specular0 = vec4(1.0, 0.0, 0.0, 1.0);
+coordinates                                     var light0_pos = vec4(1.0, 2.0, 3,0, 1.0);
+    • If w =1.0, we are specifying a finite
+      location
+                                                The source colors are specified in RGBA
+    • If w =0.0, we are specifying a parallel
+      source with the given direction vector
+
+                                                                                     𝒅 is distance
+For a positional light source, we may also
+want to account for the attenuation of light
+received due to its distance from the
+source.
+Mittuniversitetet                                                                          34
+Light-material interaction
+
+
+
+
+               Specular surface        Diffuse surface   Translucent surface
+
+                                       Matte paint            Prisms
+                       Mirrors
+                                       Many natural            Glass
+                    Metallic objects
+                                        materials             Liquids
+
+
+Mittuniversitetet                                                       35
+   Rendering equation
+
+
+
+
+                𝐿𝑜 𝑝, 𝜔𝑜 = 𝐿𝑒 𝑝, 𝜔𝑜 + න 𝐿𝑖 𝑝, 𝜔𝑖 𝑓𝑟 𝑝, 𝜔𝑖 , 𝜔𝑜                      𝜔𝑖 ⋅ 𝑛 𝑑𝜔𝑖
+                                                    Ω
+                                                                                      Dot product of the
+                                                                                      incoming light at 𝝎𝒊
+                                                                                      and surface normal 𝒏
+Output light at 𝒑
+ to direction 𝝎𝒐                                 in all
+                                              Directions          Bidirectional reflectance
+                                            (hemisphere)            distribution function
+                       Emitted light at 𝒑                                  (BRDF)
+                        to direction 𝝎𝒐
+                                                    Incoming light at 𝒑
+                                                      from direction 𝝎𝒊
+
+   Mittuniversitetet                                                                               36
+The Phong Reflection Model
+
+A simple model that can be computed
+rapidly, with local illumination.
+Approximation of the rendering equation
+
+
+Has three components
+   • Diffuse
+   • Specular
+   • Ambient
+Uses four vectors
+   • To source
+   • To viewer
+   • Normal
+   • Perfect reflector
+
+Mittuniversitetet                         37
+Ambient reflection
+
+The intensity of ambient light Ia is the same at every point on the surface. Some of this light is
+absorbed and some is reflected.
+
+
+
+Specular reflection
+The amount of light that the viewer sees depends on the angle φ between r, the direction of a
+perfect reflector, and v, the direction of the viewer.
+
+
+
+
+                                       = 𝑘 𝑠 𝐿𝑠 𝒗 ⋅ 𝒓 𝛼
+
+
+Mittuniversitetet                                                                              38
+Diffuse reflection: Lambertian surfaces
+
+Perfectly diffuse surfaces are so rough that
+there is no preferred angle of reflection.
+Such surfaces, sometimes called
+Lambertian surfaces, can be modeled
+mathematically with Lambert’s law.
+
+
+
+
+Mittuniversitetet                              39
+The Phong Reflection Model: Adding up terms
+
+Simply adding up the ambient, diffuse, and
+specular reflection terms:
+
+
+ 𝐼 = 𝑘𝑑 𝐿𝑑 𝒍 · 𝒏 + 𝑘𝑠 𝐿𝑠 𝒗 · 𝒓 𝛼 + 𝑘𝑎 𝐿𝑎
+
+
+Or, if distance terms and special conditions are
+taken into account:
+
+
+
+
+Mittuniversitetet                                  40
+Modified Phong Model
+
+The specular term in the Phong model is problematic
+because it requires the calculation of a new reflection
+vector and view vector for each vertex
+Blinn suggested an approximation using the halfway
+vector that is more efficient
+
+
+
+
+Replace 𝒗 · 𝒓 𝛼 by 𝒏 · 𝒉 𝛽 -- 𝛽 is chosen to match
+shininess
+Resulting model is known as the modified Phong or
+Phong-Blinn lighting model
+      Specified in OpenGL standard
+
+Mittuniversitetet                                         41
+Computation of vectors
+
+𝒍 and 𝒗 are specified by the application
+Can computer 𝒓 from 𝒍 and 𝒏
+
+
+Problem is determining 𝒏
+
+
+How we determine n differs depending on
+underlying representation of surface
+OpenGL leaves determination of normal to
+application
+
+
+
+
+Mittuniversitetet                          42
+Computation of vectors: Planes
+
+Equation of plane: 𝑎𝑥 + 𝑏𝑦 + 𝑐𝑧 + 𝑑 = 0
+We know that plane is determined by
+• three points 𝑝0, 𝑝1, 𝑝2 or
+• normal 𝒏 and 𝑝0
+
+
+
+
+Normal can be obtained by
+                                          𝒑𝟏        𝒑𝟐
+                 𝒏
+              𝒏=                               𝒑𝟎
+                 𝒏
+Mittuniversitetet                                   43
+Computation of vectors: Triangles
+
+Equation of plane: 𝑎𝑥 + 𝑏𝑦 + 𝑐𝑧 + 𝑑 = 0
+We know that plane is determined by
+                                               𝒑𝟐
+• three points 𝑝0, 𝑝1, 𝑝2 or
+• normal 𝒏 and 𝑝0
+
+
+
+
+Normal can be obtained by                 𝒑𝟏        𝒑𝟎
+
+                 𝒏
+              𝒏=
+                 𝒏
+Mittuniversitetet                                   44
+Shading
+
+
+
+
+Mittuniversitetet   45
+Flat Shading
+
+Shading calculation are carried
+out only once for each polygon.
+
+
+Mach bands occur
+
+
+
+
+Mittuniversitetet                 46
+Gouraud Shading
+
+Considering also vertex normal
+while shading
+
+
+
+
+Mittuniversitetet                47
+Phong Shading
+
+Interpolate normals across each
+polygon
+
+
+
+
+Mittuniversitetet                 48
+

@@ -1,0 +1,822 @@
+              DT082A Computer Graphics
+              DT067A Computer Graphics and Virtual Reality
+              Lecture 6 - Techniques and Buffers
+
+
+
+Lecture slides based on content from
+Angel and Shreiner: Interactive Computer Graphics 7E © Addison-Wesley 2015
+    Buffers
+
+                            Define a buffer by
+                            • its spatial resolution (n x m) and,
+                            • its depth (or precision) k, the number
+                              of bits/pixel
+
+
+                            • Each layer represents a ”bit”
+                                • The left image represents 32-bit
+                        k       • RGBA
+
+
+
+m
+
+         n
+    Mittuniversitetet                                                  2
+Buffers: WebGL framebuffer
+
+                             • HTML5 Canvas
+                                 • Default front and back color buffers
+                                 • Under control of local window system
+                                 • Physically on graphics card
+
+                             • Depth buffer also on graphics card
+                             • Stencil buffer -- holds masks
+                             • Most RGBA buffers 8 bits per component
+                             • Latest are floating point (IEEE)
+                             • GPUs have their own or attached memory
+                                 • texture buffers
+                                 • off-screen buffers
+                                     • not under control of window system
+                                     • may be floating point
+
+Mittuniversitetet                                                           3
+Digital Images
+
+• Framebuffer contents are unformatted           • WebGL can read pixels from the
+        • usually RGB or RGBA                      framebuffer with gl.readPixels
+        • one byte per component
+                                                 • Returns only 8-bit RGBA values
+        • no compression
+                                                 • In general, the format of pixels in the
+                                                   frame buffer is different from that of
+• Standard Web Image Formats
+                                                   processor memory and these two types of
+        • jpeg, gif, png
+                                                   memory reside in different places
+                                                      • Need packing and unpacking
+• WebGL has no conversion functions                   • Reading can be slow
+        • Understands standard Web formats for
+          texture images                         • Drawing through texture functions and off-
+                                                   screen memory (frame buffer objects)
+
+
+
+
+Mittuniversitetet                                                                               4
+WebGL pixel function
+
+
+
+           gl.readPixels(x,y,width,height,format,type,myimage)
+
+                    start pixel in frame buffer   size             type of pixels
+                                                   type of image                    pointer to processor
+                                                                                        memory
+
+
+
+          var myimage[512*512*4];
+
+          gl.readPixels(0,0, 512, 512, gl.RGBA, gl.UNSIGNED_BYTE, myimage);
+
+
+
+
+Mittuniversitetet                                                                                          5
+Render to texture
+
+• GPUs now include a large
+  amount of texture memory that
+  we can write into
+• Advantage: fast (not under
+  control of window system)
+• Using frame buffer objects
+  (FBOs) we can render into
+  texture memory instead of the
+  frame buffer and then read from
+  this memory
+        • Image processing
+        • general-purpose computing on
+          a GPU (GPGPU)
+
+
+
+Mittuniversitetet                        6
+Geometric modeling
+
+• Although graphics cards can render over 10 million polygons per
+  second, that number is insufficient for many phenomena
+        • Clouds
+        • Grass
+        • Terrain
+        • Skin
+
+
+
+
+Mittuniversitetet                                                   7
+   Geometric modeling: Modeling an Orange
+
+
+
+
+                                                                     Replace sphere with a more complex shape
+Start with an orange-colored sphere
+                                                                         Does not capture surface characteristics (small dimples)
+     Too simple
+                                                                         Takes too many polygons to model all the dimples
+
+   Mittuniversitetet     Image source: https://en.m.wikipedia.org/wiki/Bump_mapping#/media/File%3ABump-map-demo-full.png   8
+Geometric modeling: Modeling an Orange
+
+
+
+
+               Take a picture of a real orange, scan it, and “paste” onto simple geometric model
+                   This process is known as texture mapping
+
+Mittuniversitetet          Image source: https://en.m.wikipedia.org/wiki/Bump_mapping#/media/File%3ABump-map-demo-full.png   9
+Geometric modeling: Modeling an Orange
+
+
+
+
+                                            Need to change local shape
+                                            Bump mapping
+
+Mittuniversitetet   Image source: https://en.m.wikipedia.org/wiki/Bump_mapping#/media/File%3ABump-map-demo-full.png   10
+Geometric modeling: Modeling an Orange
+
+
+
+
+Mittuniversitetet   Image source: https://en.m.wikipedia.org/wiki/Bump_mapping#/media/File%3ABump-map-demo-full.png   11
+Three types of mapping
+
+
+
+
+                          Environment (reflection mapping)
+Texture Mapping                                              Bump mapping
+                              Uses a picture of the
+    Uses images to fill                                         Emulates altering
+                              environment for texture maps
+    inside of polygons                                          normal vectors during
+                              Allows simulation of highly
+                                                                the rendering process
+                              specular surfaces
+
+Mittuniversitetet                                                                  12
+Where does mapping take place?
+
+• Mapping techniques are implemented at the end of the rendering
+  pipeline
+        • Very efficient because few polygons make it past the clipper
+
+
+
+
+Mittuniversitetet                                                        13
+Mapping: Is it simple?
+
+• Although the idea is simple---map an
+  image to a surface---there are 3 or 4
+  coordinate systems involved                              parametric
+                                                            coordinates
+• Parametric coordinates
+        • May be used to model curves and
+          surfaces
+
+• Texture coordinates
+        • Used to identify points in the image to be
+          mapped
+
+• Object or World Coordinates
+        • Conceptually, where the mapping takes        texture                          window
+          place                                        coordinates                      coordinates
+                                                                          world
+• Window Coordinates                                                      coordinates
+        • Where the final image is really produced
+Mittuniversitetet                                                                            14
+Mapping Functions
+
+• Consider mapping from texture coordinates to a point
+  a surface. Appear to need three functions
+        x = x(s,t)
+        y = y(s,t)
+        z = z(s,t)
+
+• But we really want to go the other way
+        • Given a pixel, we want to know to which point on an object
+          it corresponds
+        • Given a point on an object, we want to know to which point   texture
+          in the texture it corresponds                                coordinates
+                                                                                     world
+• Need a map of the form                                                             coordinates
+               s = s(x,y,z)
+               t = t(x,y,z)
+Such functions are difficult to find in general
+Mittuniversitetet                                                                            15
+Mapping strategy
+
+Three steps to applying a texture
+                                                       y
+        1.     specify the texture
+               • read or generate image
+               • assign to texture                 z           x
+               • enable texturing                          geometry
+                                                                           display
+
+        2.     assign texture coordinates to
+               vertices
+               • Proper mapping function is left
+                  to application                           t
+                                                                          image
+
+        3.     specify texture parameters
+               • wrapping, filtering
+                                                                      s
+Mittuniversitetet                                                                    16
+Mapping example
+
+• The texture (right) is a 256 x 256 image that has been mapped
+  to a rectangular polygon which is viewed in perspective
+
+
+
+
+Mittuniversitetet                                                 17
+Mapping & WebGL pipeline
+
+• Images and geometry flow through separate pipelines that join during fragment
+  processing
+        • “complex” textures do not affect geometric complexity
+
+
+
+
+Mittuniversitetet                                                                 18
+Mapping: Specifying a texture image
+
+• Define a texture image from an array of   glTexImage2D(target, level, components, w, h,
+                                              border, format, type, texels);
+   texels (texture elements) in CPU
+  memory                                     target: type of texture, e.g. GL_TEXTURE_2D
+
+• Use an image in a standard format          level: used for mipmapping (discussed later)
+  such as JPEG                               components: elements per texel
+    • Scanned image
+                                             w, h: width and height of texels in pixels
+    • Generate by application code
+                                             border: used for smoothing (discussed later)
+• WebGL supports only 2 dimensional
+  texture maps                               format and type: describe texels
+    • no need to enable as in desktop        texels: pointer to texel array
+      OpenGL
+    • desktop OpenGL supports 1-4
+      dimensional texture maps              glTexImage2D(GL_TEXTURE_2D, 0, 3, 512, 512,
+                                              0, GL_RGB, GL_UNSIGNED_BYTE, my_texels);
+
+Mittuniversitetet                                                                           19
+Mapping: Specifying a texture image
+
+• Based on parametric texture coordinates
+• Specify as a 2D vertex attribute
+
+
+
+                                     Texture Space                      Object Space
+                              t                   1, 1                     (s, t) = (0.2, 0.8)
+                           0, 1                                                       A
+                                     a
+
+
+                                              c            (0.4, 0.2)
+                                         b
+                                                                  B                       C
+                              0, 0                1, 0 s                            (0.8, 0.4)
+
+
+Mittuniversitetet                                                                                20
+Texture Atlas
+
+
+
+
+Mittuniversitetet   21
+Texture Atlas
+
+
+
+
+Mittuniversitetet   22
+                    Armor
+
+Texture Atlas
+
+
+                             Body
+
+
+
+
+                    Weapon
+
+
+
+
+Mittuniversitetet                   23
+Texture vs. Shading
+
+
+
+
+Mittuniversitetet     24
+Interpolation
+
+WebGL uses interpolation to find proper texels from specified texture coordinates
+Can be distortions
+
+                                                              texture stretched
+                                                              over trapezoid
+                    good selection       poor selection       showing effects of
+                    of tex coordinates   of tex coordinates   bilinear interpolation
+
+
+
+
+Mittuniversitetet                                                                      25
+Using texture objects
+
+1. specify textures in texture objects
+2. set texture filter
+3. set texture function
+4. set texture wrap mode
+5. set optional perspective correction hint
+6. bind texture object
+7. enable texturing
+8. supply texture coordinates for vertex
+      •       coordinates can also be generated
+
+Mittuniversitetet                                 26
+Texture parameters
+
+• WebGL has a variety of parameters that determine how texture is applied
+
+
+• Wrapping parameters
+        • determine what happens if s and t are outside the (0,1) range
+
+• Filter
+        • modes allow us to use area averaging instead of point samples
+
+• Mipmapping
+        • allows us to use textures at multiple resolutions
+
+• Environment parameters
+        • determine how texture mapping interacts with shading
+
+
+
+
+Mittuniversitetet                                                           27
+Wrapping Mode
+
+Clamping: if s,t > 1 use 1, if s,t <0 use 0
+Wrapping: use s,t modulo 1
+   gl.texParameteri( gl.TEXTURE_2D,             gl.TEXTURE_WRAP_S, gl.CLAMP )
+   gl.texParameteri( gl.TEXTURE_2D,             gl.TEXTURE_WRAP_T, gl.REPEAT )
+
+
+
+                        t
+
+
+
+                                       s
+                                              gl.REPEAT       gl.CLAMP
+                             texture           wrapping       wrapping
+
+
+Mittuniversitetet                                                                28
+Magnification and Minification
+
+• More than one texel can cover a pixel (minification) or
+  more than one pixel can cover a texel (magnification)
+
+
+• Can use point sampling (nearest texel) or linear filtering ( 2 x 2 filter) to obtain texture
+  values
+
+
+
+
+                    Texture          Polygon                Texture          Polygon
+                          Magnification                            Minification
+
+Mittuniversitetet                                                                                29
+Filter modes
+
+
+
+                    Modes determined by
+                      gl.texParameteri( target, type, mode )
+
+
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXURE_MAG_FILTER, gl.NEAREST);
+
+
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXURE_MIN_FILTER, gl.LINEAR);
+
+
+
+
+Mittuniversitetet                                                               30
+Mipmapped Textures
+
+• Mipmapping allows for prefiltered texture maps of decreasing resolutions &
+  lessens interpolation errors for smaller textured objects
+• Declare mipmap level during texture definition
+        gl.texImage2D(gl.TEXTURE_*D, level, … )
+                                              Mipmapped point         Mipmapped linear
+Point sampling            Linear filtering       sampling                 filtering
+
+
+
+
+Mittuniversitetet                                                                 31
+Applying textures
+
+
+
+• Texture can be applied in many ways
+  • texture fully determines color
+  • modulated with a computed color
+  • blended with and environmental color
+
+
+• Fixed function pipeline has a function
+  glTexEnv to set mode
+  • deprecated
+  • can get all desired functionality via
+     fragment shader
+• Can also use multiple texture units
+
+
+Mittuniversitetet                           32
+Other Texture Features
+
+• Environment Maps
+        • Start with image of environment through a
+          wide angle lens
+               • Can be either a real scanned image or an
+                 image created in OpenGL
+        • Use this texture to generate a spherical
+          map
+        • Alternative is to use a cube map
+
+• Multitexturing
+        • Apply a sequence of textures through
+          cascaded texture units
+
+
+
+
+Mittuniversitetet                                           33
+Specifying a texture image
+
+            var image1 = new Uint8Array(4*texSize*texSize);
+
+            for ( var i = 0; i < texSize; i++ ) {
+                for ( var j = 0; j <texSize; j++ ) {
+                    var patchx = Math.floor(i/(texSize/numChecks));
+                    var patchy = Math.floor(j/(texSize/numChecks));
+                    if(patchx%2 ^ patchy%2) c = 255;
+                    else c = 0;
+
+                        //c = 255*(((i & 0x8) == 0) ^ ((j & 0x8)   == 0))
+                        image1[4*i*texSize+4*j] = c;
+                        image1[4*i*texSize+4*j+1] = c;
+                        image1[4*i*texSize+4*j+2] = c;
+                        image1[4*i*texSize+4*j+3] = 255;
+                    }
+            }
+
+
+Mittuniversitetet                                                           34
+User a GIF image
+
+           // specify image in JS file
+           var image = new Image();
+
+           image.onload = function() {
+             configureTexture( image );
+           }
+           image.src = "SA2011_black.gif”
+
+           // or specify image in HTML file with <img> tag
+           // <img id = "texImage" src = "SA2011_black.gif"></img>
+           // var image = document.getElementById("texImage”)
+
+           window.onload = configureTexture( image );
+
+
+
+
+Mittuniversitetet                                                    35
+User a GIF image
+
+           function configureTexture( image ) {
+              var texture = gl.createTexture();
+              gl.bindTexture(gl.TEXTURE_2D, texture);
+
+                // Flip the image's Y-axis to match WebGL's texture coordinate system
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+                // Specify the texture image
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+                // Generate mipmaps for the texture & set the texture's minification/magnification filter to use mipmaps
+                gl.generateMipmap(gl.TEXTURE_2D );
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR );
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+
+                // Activate texture unit 0 and bind the texture to it
+                gl.activeTexture(gl.TEXTURE0);
+
+                // Pass the texture unit to the shader
+                gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+           }
+
+
+Mittuniversitetet                                                                                                          36
+Applying textures
+
+• Textures are applied during fragments shading by a sampler
+• Samplers return a texture color from a texture object
+
+
+Fragment shader:
+           varying vec4 color;        //color from rasterizer
+           varying vec2 texCoord;     //texture coordinate from rasterizer
+           uniform sampler2D texture; //texture object from application
+
+           void main() {
+             gl_FragColor = color * texture2D( texture, texCoord );
+           }
+
+
+
+
+Mittuniversitetet                                                            37
+Applying textures
+
+• Usually vertex shader will output texture coordinates to be rasterized
+• Must do all other standard tasks too
+        • Compute vertex position
+        • Compute vertex color if needed
+
+
+
+
+           attribute vec4 vPosition; //vertex position in object coordinates
+           attribute vec4 vColor;    //vertex color from application
+           attribute vec2 vTexCoord; //texture coordinate from application
+
+           varying vec4 color;       //output color to be interpolated
+           varying vec2 texCoord;    //output tex coordinate to be interpolated
+
+
+
+
+Mittuniversitetet                                                                 38
+Reflecting the environment
+
+                                 If we map all objects to hemisphere, we
+                                 cannot tell if they are on the sphere or
+                    N            anywhere else along the reflector
+
+       I                         Use the map on the sphere as a texture
+                                 that can be mapped onto the object
+                             R
+                                 Can use other surfaces as the
+                                 intermediate
+                                      Cube maps
+                                      Cylinder maps
+
+
+
+
+Mittuniversitetet                                                    39
+Reflecting the environment
+
+                             • Compute R = 2(N·I)N-I
+
+                             • Object at origin
+
+                             • Use largest magnitude component of R to
+                             determine face of cube
+
+                             • Other two components give coordinates
+                    I
+                        R    • WebGL supports only cube maps
+                                  • desktop OpenGL also supports
+                                     sphere maps
+                             • First must form map
+                                  • Use images from a real camera
+                                  • Form images with WebGL
+                             • Texture map it to object
+
+
+Mittuniversitetet                                                   40
+Reflecting the environment
+
+                             •We can form a cube map texture by defining six 2D
+                             texture maps that correspond to the sides of a box
+
+                             •Supported by WebGL through cubemap sampler
+
+                             vec4 texColor = textureCube(mycube, texcoord);
+
+                             •Texture coordinates must be 3D
+                    I
+                        R        •usually are given by the vertex location so we don’t
+                                 need compute separate tex coords
+
+
+
+
+Mittuniversitetet                                                                 41
+Issues with reflectance
+
+• Must assume environment is very far
+  from object (equivalent to the
+  difference between near and distant
+  lights)
+• Object cannot be concave (no self
+  reflections possible)
+• No reflections between objects
+• Need a reflection map for each object
+• Need a new map if viewer moves
+
+
+
+
+Mittuniversitetet                         42
+Reflecting the environment
+
+
+
+
+Mittuniversitetet   Image source; https://en.wikipedia.org/wiki/Cube_mapping#/media/File:Panorama_cube_map.png   43
+Reflecting the environment
+
+
+                                              gl.textureMap2D( gl.TEXTURE_CUBE_MAP_POSITIVE_X, level, rows, columns,
+                                                  border, gl.RGBA, gl.UNSIGNED_BYTE, image1)
+
+
+
+
+                                                                         • Same for other five images
+
+                                                                         • Make one texture object out of the six images
+
+
+
+
+Mittuniversitetet   Image source; https://en.wikipedia.org/wiki/Cube_mapping#/media/File:Panorama_cube_map.png        44
+Program Objects and Shaders
+
+• For most applications of render-to-texture we
+  need multiple program objects and shaders
+        • One set for creating a texture
+        • Second set for rendering with that texture
+
+
+• Applications that we consider later such as
+  buffer pingponging may require additional
+  program objects
+
+
+
+
+Mittuniversitetet                                      45
+Program Object 1 Shaders
+
+• Vertex shader              • Fragment shader
+
+attribute vec4 vPosition;    precision mediump float;
+
+void main()                  void main()
+{                            {
+  gl_Position = vPosition;     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}                            }
+
+
+
+
+Mittuniversitetet                                                         46
+Program Object 2 Shaders
+
+• Vertex shader              • Fragment shader
+
+attribute vec4 vPosition;    precision mediump float;
+attribute vec2 vTexCoord;
+varying vec2 fTexCoord;      varying vec2 fTexCoord;
+                             uniform sampler2D texture;
+void main()
+{                            void main()
+  gl_Position = vPosition;   {
+  fTexCoord = vTexCoord;        gl_FragColor = texture2D(texture, fTexCoord);
+}                            }
+
+
+
+
+Mittuniversitetet                                                               47
+First render
+
+               gl.useProgram( program1 );
+                 var buffer1 = gl.createBuffer();
+                 gl.bindBuffer( gl.ARRAY_BUFFER, buffer1 );
+                 gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
+
+               // Initialize the vertex position attribute from the vertex shader
+
+                    var vPosition = gl.getAttribLocation( program1, "vPosition" );
+                    gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
+                    gl.enableVertexAttribArray( vPosition );
+
+               // Render one triangle
+
+                    gl.viewport( 0, 0, 64, 64 );
+                    gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
+                    gl.clear( gl.COLOR_BUFFER_BIT );
+                    gl.drawArrays( gl.TRIANGLES, 0, 3 );
+
+
+
+
+Mittuniversitetet                                                                          48
+Setup second render
+
+               // Bind to default window system framebuffer
+
+                    gl.bindFramebuffer( gl.FRAMEBUFFER, null );
+                    gl.disableVertexAttribArray( vPosition );
+                    gl.useProgram( program2 );
+
+               // Assume we have already set up a texture object with null texture image
+
+                    gl.activeTexture( gl.TEXTURE0 );
+                    gl.bindTexture( gl.TEXTURE_2D, texture1 );
+
+               // set up vertex attribute arrays for texture coordinates and rectangle as usual
+
+
+
+
+Mittuniversitetet                                                                                 49
+Data for second render
+
+               var buffer2 = gl.createBuffer();
+               gl.bindBuffer( gl.ARRAY_BUFFER, buffer2);
+               gl.bufferData( gl.ARRAY_BUFFER, new flatten(vertices), gl.STATIC_DRAW );
+
+               var vPosition = gl.getAttribLocation( program2, "vPosition" );
+               gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
+               gl.enableVertexAttribArray( vPosition );
+
+
+
+               var buffer3 = gl.createBuffer();
+               gl.bindBuffer( gl.ARRAY_BUFFER, buffer3 );
+               gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoord), gl.STATIC_DRAW );
+
+               var vTexCoord = gl.getAttribLocation( program2, "vTexCoord“ );
+               gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+               gl.enableVertexAttribArray( vTexCoord );
+
+
+
+
+Mittuniversitetet                                                                         50
+Render a quad with texture
+
+gl.uniform1i( gl.getUniformLocation(program2,
+"texture"), 0);
+
+gl.viewport(0, 0, 512, 512);
+gl.clearColor(0.0, 0.0, 1.0, 1.0);
+gl.clear( gl.COLOR_BUFFER_BIT );
+
+gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+
+
+
+Mittuniversitetet                               51
+

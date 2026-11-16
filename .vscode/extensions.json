@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "ritwickdey.liveserver",
+    "slevesque.shader"
+  ]
+}

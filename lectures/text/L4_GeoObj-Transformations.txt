@@ -1,0 +1,672 @@
+              DT082A Computer Graphics
+              DT067A Computer Graphics and Virtual Reality
+              Lecture 4 - Geometric objects and transformations
+
+
+
+Lecture slides based on content from
+Angel and Shreiner: Interactive Computer Graphics 7E © Addison-Wesley 2015
+Mittuniversitetet   2
+Mittuniversitetet   3
+Mittuniversitetet   4
+Outline
+
+• Geometric objects
+        • Representation, dimension, coordinate systems, basis
+
+
+
+• Frames
+        • Model frame, world frame, user frame
+        • Homogeneous coordinates
+
+
+
+• Transformation(s)
+        • Transformation matrices
+
+
+
+• WebGL implementation
+
+
+Mittuniversitetet                                                5
+Geometric objects
+
+
+
+
+                    •Points
+
+                    •Lines
+
+                    •Planes
+
+                    •Curves (1D)
+
+                    •Surfaces (2D)
+
+                    •Solids (3D)
+
+
+
+
+Mittuniversitetet                  6
+Geometric objects
+
+
+
+
+                    •Points
+
+                    •Lines
+
+                    •Planes
+
+                    •Curves (1D)
+
+                    •Surfaces (2D)
+
+                    •Solids (3D)
+
+
+
+
+Mittuniversitetet                  7
+Geometric objects
+
+ A set of vectors v1, v2, …, vn is linearly independent if
+
+          𝛼1 𝜈1 + 𝛼2 𝜈2 + ⋯ + 𝛼𝑛 𝜈𝑛 = 0 ⇔ 𝛼1 = 𝛼2 = ⋯ = 𝛼𝑛 = 0    •Points
+
+                                                                  •Lines
+ If a set of vectors is linearly independent, we cannot
+ represent one in terms of the others              z              •Planes
+
+                                                                  •Curves (1D)
+
+                                                             y    •Surfaces (2D)
+                                             x
+                                                                  •Solids (3D)
+ If a set of vectors is linearly dependent, at least one can be
+ written in terms of the others
+
+Mittuniversitetet                                                                8
+Geometric objects: dimension
+
+ In a vector space, the maximum number of linearly
+ independent vectors is fixed and is called the dimension
+ of the space                                                          •Points
+
+                                                                       •Lines
+ In an n-dimensional space, any set of n linearly
+ independent vectors form a basis for the space                        •Planes
+
+                                                                       •Curves (1D)
+ Given a basis v1, v2,…., vn, any vector v can be written as
+    𝜈 = 𝛼1 𝜈1 + 𝛼2 𝜈2 + ⋯ + 𝛼𝑛 𝜈𝑛                              z       •Surfaces (2D)
+
+ where the {𝛼𝑖 } are unique                                            •Solids (3D)
+
+                                                                   y
+                                                       x
+
+
+Mittuniversitetet                                                                     9
+Geometric objects
+
+• Until now we have been able to work with geometric entities without using any frame of
+  reference, such as a coordinate system
+
+
+• Need a frame of reference to relate points and objects to our physical world.
+        • For example, where is a point? Can’t answer without a reference system
+        • World coordinates
+        • Camera coordinates
+
+
+
+
+Mittuniversitetet                                                                          10
+Geometric objects: representation
+
+ In 3D space:                           z
+
+
+                                                •Points
+                                            y
+                                    x
+                                                •Lines
+
+                                                •Planes
+
+                                                •Curves (1D)
+
+                                                •Surfaces (2D)
+
+                                                •Solids (3D)
+
+
+
+
+Mittuniversitetet                                              11
+Geometric objects
+
+
+
+
+                    •Points
+
+                    •Lines
+
+                    •Planes
+
+                    •Curves (1D)
+
+                    •Surfaces (2D)
+
+                    •Solids (3D)
+
+
+
+
+Mittuniversitetet                  12
+Geometric objects
+
+
+
+
+                    •Points
+
+                    •Lines
+
+                    •Planes
+
+                    •Curves (1D)
+
+                    •Surfaces (2D)
+
+                    •Solids (3D)
+
+
+
+
+Mittuniversitetet                  13
+Frames
+
+• A coordinate system is insufficient to represent points
+• If we work in an affine space we can add a single point, the origin, to the basis vectors to
+  form a frame -- Frame determined by (𝑃0, 𝜈1, 𝜈2, 𝜈3)
+
+
+
+
+                    𝒘
+  𝒘
+
+
+
+
+Mittuniversitetet                                                                                14
+Frames: change of coordinate systems
+
+
+Model frame                           World frame                             Eye frame
+
+
+
+
+Mittuniversitetet   Inspired by Lectures of Cem Yuksel – University of Utah           15
+Frames: change of coordinate systems
+
+• Let’s try to change coordinate systems
+
+
+
+
+                                           𝒘
+
+
+
+
+Mittuniversitetet                              16
+Frames: homongeneous coordinates
+
+• With a 3x3 matrix, we can redefine a vector.
+  Will that redefine also a point?
+
+
+
+
+                                                 𝒘
+
+
+
+
+Mittuniversitetet                                    17
+Frames: homongeneous coordinates
+
+
+
+
+                                   𝒘
+
+
+
+
+Mittuniversitetet                      18
+Frames: homongeneous coordinates
+
+
+
+
+                                   𝒘
+
+
+
+
+Mittuniversitetet                      19
+Frames: homongeneous coordinates
+
+• Homogeneous coordinates are key to all
+  computer graphics systems
+        • All standard transformations (rotation,
+          translation, scaling) can be implemented
+          with matrix multiplications using 4 x 4
+          matrices
+
+        • Hardware pipeline works with 4 dimensional   𝒘
+          representations
+
+        • For orthographic viewing, we can maintain
+          w=0 for vectors and w=1 for points
+               • In [x, y, z, w]
+
+
+        • For perspective we need a perspective
+          division
+
+
+Mittuniversitetet                                          20
+Frames: homongeneous coordinates
+
+
+
+
+Mittuniversitetet                  21
+Transformations
+
+• Standard transformations:
+    • Rotation
+    • Translation
+    • Scaling
+    • Shear
+
+
+• Derive homogeneous coordinate
+  transformation matrices
+
+
+• Learn to build arbitrary transformation
+  matrices from simple transformations
+
+
+
+Mittuniversitetet                           22
+Transformations: Affine transformation
+
+• Every linear transformation is equivalent to a
+  change in frames
+• Every affine transformation preserves lines
+• However, an affine transformation has only 12
+  degrees of freedom because 4 of the elements in
+  the matrix are fixed and are a subset of all possible
+  4 x 4 linear transformations
+• Characteristic of many physically important
+  transformations
+        • Rigid body transformations: rotation, translation
+        • Scaling, shear
+
+• Importance in graphics is that we need only
+  transform endpoints of line segments and let
+  implementation draw line segment between the
+  transformed endpoints
+
+Mittuniversitetet                                             23
+Transformations: Translation
+
+
+
+• Move (translate, displace) a point to a            P’
+  new location
+
+
+                                                d
+• Displacement determined by a vector d     P
+        • Three degrees of freedom
+        • P’=P+d
+
+
+
+Mittuniversitetet                                   24
+Transformations: Translation
+
+Although we can move a point to a new location in infinite ways,
+ when we move many points there is usually only one way
+
+
+                                                                        P’
+
+
+
+                                                           d
+
+                                              P
+
+
+Mittuniversitetet                                                  25
+Transformations: Translation
+
+Although we can move a point to a new location in infinite ways,
+ when we move many points there is usually only one way
+
+
+
+         𝒑’ = 𝑻𝒑
+                           1   0   0 𝑑𝑥
+                                   0 𝑑𝑦
+      𝑻 = 𝑻 𝑑𝑥, 𝑑𝑦, 𝑑𝑧   = 0   1
+                           0   0   1 𝑑𝑧
+                           0   0   0 1
+
+
+Mittuniversitetet                                                  26
+Transformations: Rotation
+
+
+
+
+Mittuniversitetet           27
+Transformations: Rotation
+ A rotation by  about an arbitrary axis can be decomposed
+ into the concatenation of rotations about the x, y, and z axes
+
+
+
+
+ 𝛾, 𝛽, 𝛼 are called the Euler angles
+
+  Note that rotations do not commute
+  We can use rotations in another order but with different angles
+Mittuniversitetet                                                   28
+Transformations: Scaling
+
+• Expand or contract along each axis (fixed
+  point of origin)
+
+                    𝒙’ = 𝒔𝒙 𝒙
+                    𝒚’ = 𝒔𝒚 𝒚
+                    𝒛’ = 𝒔𝒛 𝒛
+                    𝒑’ = 𝑺𝒑
+
+                                  𝑠𝑥 0   0 0
+                                  0 𝑠𝑦   0 0
+    𝑺 = 𝑺 𝑠𝑥 , 𝑠𝑦 , 𝑠𝑧          =
+                                   0 0   𝑠𝑧 0
+                                   0 0   0 1
+Mittuniversitetet                               29
+Transformations: Scaling
+
+• Expand or contract along each axis (fixed
+  point of origin)
+
+                    𝒙’ = 𝒔𝒙 𝒙
+                    𝒚’ = 𝒔𝒚 𝒚
+                    𝒛’ = 𝒔𝒛 𝒛
+                    𝒑’ = 𝑺𝒑
+
+                                  𝑠𝑥 0   0 0
+                                  0 𝑠𝑦   0 0
+    𝑺 = 𝑺 𝑠𝑥 , 𝑠𝑦 , 𝑠𝑧          =
+                                   0 0   𝑠𝑧 0
+                                   0 0   0 1
+Mittuniversitetet                               30
+Transformations: Reflection
+
+
+
+                              original
+    𝑠𝑥 = −1, 𝑠𝑦 = 1
+
+
+
+
+ 𝑠𝑥 = −1, 𝑠𝑦 = −1             𝑠𝑥 = 1, 𝑠𝑦 = −1
+
+
+
+
+Mittuniversitetet                               31
+Transformations: Shear
+
+• Helpful to add one more basic transformation
+• Equivalent to pulling faces in opposite
+  directions
+
+
+
+
+Mittuniversitetet                                32
+Transformations: Inverses
+
+• Although we could compute inverse matrices by general
+  formulas, we can use simple geometric observations
+
+        • Translation:
+
+                          𝑻−𝟏 (𝑑𝑥, 𝑑𝑦, 𝑑𝑧) = 𝑻(−𝑑𝑥, −𝑑𝑦, −𝑑𝑧)
+
+        • Rotation:
+
+                             𝑹−1 (𝜃) = 𝑹(−𝜃)
+               • Holds for any rotation matrix
+               • Note that since cos(-) = cos() and sin(-)=-sin()
+                             𝑹−1 (𝜃) = 𝑹𝑻 (𝜃)
+
+        • Scaling:
+
+                    𝑺−𝟏 (𝑠𝑥, 𝑠𝑦, 𝑠𝑧) = 𝑺(1/𝑠𝑥, 1/𝑠𝑦, 1/𝑠𝑧)
+
+
+Mittuniversitetet                                                       33
+Transformations: Concatenation
+
+• We can form arbitrary affine transformation matrices by multiplying together rotation,
+  translation, and scaling matrices. Because the same transformation is applied to many
+  vertices, the cost of forming a matrix 𝑴 = 𝑨𝑩𝑪𝑫 is not significant compared to the cost
+  of computing 𝑴𝒑 for many vertices 𝒑.The difficult part is how to form a desired
+  transformation from the specifications in the application’
+
+                             C                                         A
+
+• Note that matrix on the right is the first applied
+• Mathematically, the following are equivalent
+        𝒑’ = 𝑨𝑩𝑪𝒑 = 𝑨(𝑩(𝑪𝒑))
+• Note many references use column matrices to represent points. In terms of column
+  matrices
+         𝒑’𝑇 = 𝒑𝑇𝑪𝑇𝑩𝑇𝑨𝑇
+
+Mittuniversitetet                                                                           34
+Transformations: Rotation about a fixed point other than the origin
+
+• Move fixed point to origin → Rotate → Move fixed point back
+
+
+                         𝑴 = 𝑻(𝑝𝑓) 𝑹(𝜃) 𝑻(−𝑝𝑓)
+
+
+
+
+Mittuniversitetet                                                     35
+WebGL implementation
+
+• Learn how to carry out transformations in WebGL
+        • Rotation
+        • Translation
+        • Scaling
+
+• Introduce MV.js transformations
+        • Model-view
+        • Projection
+                                                    ?
+
+
+
+
+Mittuniversitetet                                       36
+Instancing
+
+• One option is to specify each of
+  these objects, through its vertices,
+  in the desired location with the
+  desired orientation and size.
+
+
+
+
+• An alternative and preferred
+  method is applying the instance
+  transformation to the prototype.
+Mittuniversitetet                        37
+WebGL implementation
+                               T( )            T( )
+
+
+                        T( )          T( )
+      vertices           vertices            pixel
+
+
+
+
+      vertices
+
+
+                    T
+
+
+
+
+Mittuniversitetet                                    38
+WebGL implementation
+
+
+
+
+                    C   A
+
+
+
+
+Mittuniversitetet           39
+WebGL implementation
+
+• In WebGL, the model-view matrix is used to
+    • Position the camera
+       • Can be done by rotations and translations but is often easier to use the lookAt
+          function in MV.js
+    • Build models of objects
+• The projection matrix is used to define the view volume and to select a camera lens
+• Although these matrices are no longer part of the OpenGL state, it is usually a good
+  strategy to create them in our own applications
+
+
+
+
+                                                                      𝒒 = 𝑷 𝑴𝑽 𝒑
+
+Mittuniversitetet                                                                          40
+WebGL example
+        var R = mat4();
+        var ctm = mat4();
+
+        var thetaX = Math.acos(3.0/Math.sqrt(14.0));
+        var thetaY = Math.sqrt(13.0/14.0);
+        var d = vec3(4.0, 5.0, 6.0);
+
+        R = mult(R, rotateX(thetaX));
+        R = mult(R, rotateY(thetaY));
+        R = mult(R, rotateZ(-45.0));
+        R = mult(R, rotateY(-thetaY));
+        R = mult(R, rotateX(-thetaX));
+
+        ctm = translate(ctm, d);
+        ctm = mult(ctm, R);
+        ctm = translate(ctm, negate(d));
+
+Mittuniversitetet                                      41
+ WebGL example
+
+
+• Rotation about z axis by 30 degrees with a fixed
+  point of (1.0, 2.0, 3.0)
+
+         var m = mult(translate(1.0, 2.0, 3.0), rotate(30.0, 0.0, 0.0, 1.0));
+         m = mult(m, translate(-1.0, -2.0, -3.0));
+
+
+• Remember that last matrix specified in the program
+  is the first applied
+
+
+
+Mittuniversitetet                                                               42
+WebGL implementation: Rotations
+
+• From a practical standpoint, we often want to use transformations to move and
+  reorient an object smoothly
+    • Problem: find a sequence of model-view matrices M0,M1,…..,Mn so that when
+      they are applied successively to one or more objects we see a smooth
+      transition
+
+
+• For orientating an object, we can use the fact that every rotation corresponds to
+  part of a great circle on a sphere
+   • Find the axis of rotation and angle
+   • Virtual trackball (see textbook)
+
+
+
+
+Mittuniversitetet                                                                     43
+WebGL implementation: Rotations
+
+• Consider the two approaches
+   • For a sequence of rotation matrices R0,R1,…..,Rn , find the Euler angles for
+     each and use Ri= Riz Riy Rix
+       • Not very efficient
+
+
+        • Use the final positions to determine the axis and angle of rotation, then
+          increment only the angle
+• Quaternions can be more efficient than either
+
+
+
+
+Mittuniversitetet                                                                     44
+Quaternions
+
+• Extension of imaginary numbers from two to three dimensions
+• Requires one real and three imaginary components i, j, k
+
+                            𝑞 = 𝑞0 + 𝑞1𝒊 + 𝑞2𝒋 + 𝑞3𝒌
+                             𝒊𝟐 = 𝒋𝟐 = 𝒌𝟐 = 𝒊𝒋𝒌 = −𝟏
+
+• Quaternions can express rotations on sphere smoothly and
+  efficiently. Process:
+        • Model-view matrix → quaternion
+        • Carry out operations with quaternions
+        • Quaternion → Model-view matrix
+
+Mittuniversitetet                                               45
+

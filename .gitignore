@@ -1,0 +1,26 @@
+# Kursboken – pushas aldrig
+textbook/*
+!textbook/README.md
+*.epub
+
+# Personliga Claude-inställningar (de delade ligger i .claude/commands)
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Node (om ni använder npm för en lokal server)
+node_modules/
+
+# LaTeX-skräp (om rapporterna skrivs i LaTeX)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
